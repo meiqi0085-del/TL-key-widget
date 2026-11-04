@@ -1,0 +1,51 @@
+name: Apply and validate desktop widget
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - widget.patch
+      - .github/workflows/apply-widget.yml
+permissions:
+  contents: write
+concurrency:
+  group: apply-widget
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'meiqi0085-del/TL-key-widget'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply reviewed widget changes
+        run: git apply --index widget.patch
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install SDK
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager 'platforms;android-36' 'build-tools;36.1.0'
+      - name: Test, lint and build
+        working-directory: client
+        run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleRelease --console=plain
+      - name: Upload verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: widget-verification
+          path: |
+            client/app/build/reports/
+            client/app/build/outputs/apk/release/
+          retention-days: 14
+      - name: Save verified source code
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm widget.patch .github/workflows/apply-widget.yml
+          git commit -m 'Add fixed-vehicle power widget with blue feedback and 60-second reset'
+          git push origin HEAD:main
