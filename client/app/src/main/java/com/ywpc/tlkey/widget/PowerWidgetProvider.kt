@@ -93,8 +93,8 @@ class PowerWidgetProvider : AppWidgetProvider() {
             views.setInt(R.id.widget_off_icon, "setColorFilter", if (state.selected == PowerWidgetState.OFF) blue else defaultColor)
             views.setBoolean(R.id.widget_on, "setEnabled", state.pendingUntil == 0L)
             views.setBoolean(R.id.widget_off, "setEnabled", state.pendingUntil == 0L)
-            views.setOnClickPendingIntent(R.id.widget_on, activity(context, id, PowerWidgetState.ON))
-            views.setOnClickPendingIntent(R.id.widget_off, activity(context, id, PowerWidgetState.OFF))
+            views.setOnClickPendingIntent(R.id.widget_on, control(context, id, PowerWidgetState.ON))
+            views.setOnClickPendingIntent(R.id.widget_off, control(context, id, PowerWidgetState.OFF))
             views.setOnClickPendingIntent(R.id.widget_vehicle, activity(context, id, "configure"))
             views.setOnClickPendingIntent(R.id.widget_status, activity(context, id, if (valid) "open" else "configure"))
             views.setOnClickPendingIntent(R.id.widget_title, activity(context, id, "open"))
@@ -108,11 +108,22 @@ class PowerWidgetProvider : AppWidgetProvider() {
             } else alarms.cancel(pending)
         }
 
+        internal fun control(context: Context, id: Int, action: String): PendingIntent {
+            require(action == PowerWidgetState.ON || action == PowerWidgetState.OFF)
+            val intent = Intent(context, PowerWidgetControlService::class.java).apply {
+                data = Uri.parse("tlkey-widget://$id/$action")
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+                putExtra("power_action", action)
+            }
+            return PendingIntent.getForegroundService(context, id, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        }
+
         private fun activity(context: Context, id: Int, action: String): PendingIntent {
             val target = when (action) {
                 "configure" -> PowerWidgetConfigureActivity::class.java
                 "open" -> MainActivity::class.java
-                else -> PowerWidgetActionActivity::class.java
+                else -> error("Unknown widget navigation action")
             }
             val intent = Intent(context, target).apply {
                 data = Uri.parse("tlkey-widget://$id/$action")

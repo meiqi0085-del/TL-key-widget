@@ -1,5 +1,10 @@
 package com.ywpc.tlkey.widget
 
+import android.Manifest
+import android.bluetooth.BluetoothManager
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -29,13 +34,19 @@ import java.util.UUID
 class PowerWidgetControlService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var operation: Job? = null
+    private var startupFailure: String? = null
     private val resets = mutableMapOf<Int, Job>()
 
     override fun onCreate() {
         super.onCreate()
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel(CHANNEL, "桌面控车", NotificationManager.IMPORTANCE_LOW))
-        startForeground(NOTIFICATION, notification("正在处理桌面控车"))
+        try {
+            startForeground(NOTIFICATION, notification("正在处理桌面控车"))
+        } catch (_: RuntimeException) {
+            // Permission revocation / vendor restrictions must never open an Activity.
+            startupFailure = "后台控车不可用，请检查蓝牙权限和应用后台设置"
+        }
     }
     override fun onBind(intent: Intent?): IBinder? = null
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -59,6 +70,15 @@ class PowerWidgetControlService : Service() {
         val initial = store.read(id)
         if (!PowerWidgetProvider.valid(this, initial)) {
             PowerWidgetProvider.render(this, id); stopIfIdle(); return START_NOT_STICKY
+        }
+        val problem = startupFailure ?: readinessProblem(initial)
+        if (problem != null) {
+            resets.remove(id)?.cancel()
+            store.write(id, initial.copy(selected = "", resetAt = 0, pendingUntil = 0,
+                message = problem, updatedAt = System.currentTimeMillis()))
+            PowerWidgetProvider.render(this, id)
+            stopIfIdle()
+            return START_NOT_STICKY
         }
         resets.remove(id)?.cancel()
         val token = UUID.randomUUID().toString()
@@ -112,6 +132,27 @@ class PowerWidgetControlService : Service() {
         }
         return START_NOT_STICKY
     }
+    private fun readinessProblem(state: PowerWidgetState): String? {
+        val vehicle = (application as App).vehicleRepository.find(state.vehicleId)
+            ?: return "请打开 TL-key 重新选择车辆"
+        if (!vehicle.hasBleCredentials) return "请在 TL-key 中完成车辆配对"
+        val required = buildList {
+            if (Build.VERSION.SDK_INT >= 31) {
+                add(Manifest.permission.BLUETOOTH_CONNECT)
+                if (vehicle.bleAddress == null) add(Manifest.permission.BLUETOOTH_SCAN)
+            } else if (vehicle.bleAddress == null) add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        if (required.any { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED })
+            return "请在应用设置中授权蓝牙后重试"
+        val adapter = getSystemService(BluetoothManager::class.java)?.adapter
+            ?: return "此设备不支持蓝牙"
+        return try {
+            if (adapter.isEnabled) null else "请开启蓝牙后重新点击"
+        } catch (_: SecurityException) {
+            "请在应用设置中授权蓝牙后重试"
+        }
+    }
+
     private fun stopIfIdle() {
         if (operation == null && resets.isEmpty()) {
             stopForeground(STOP_FOREGROUND_REMOVE)

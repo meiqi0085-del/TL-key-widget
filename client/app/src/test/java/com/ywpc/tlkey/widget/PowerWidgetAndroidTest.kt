@@ -17,6 +17,25 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = Application::class)
 class PowerWidgetAndroidTest {
+    @Test fun powerButtonsTargetServicesWithoutLaunchingAnActivity() {
+        val context = RuntimeEnvironment.getApplication()
+        val on = PowerWidgetProvider.control(context, 7, PowerWidgetState.ON)
+        val off = PowerWidgetProvider.control(context, 7, PowerWidgetState.OFF)
+        val other = PowerWidgetProvider.control(context, 8, PowerWidgetState.ON)
+        for (pending in listOf(on, off, other)) {
+            assertTrue(pending.isForegroundService)
+            assertFalse(pending.isActivity)
+            val intent = org.robolectric.Shadows.shadowOf(pending).savedIntent
+            assertEquals(PowerWidgetControlService::class.java.name, intent.component?.className)
+        }
+        assertNotEquals(on, off)
+        assertNotEquals(on, other)
+        assertEquals(PowerWidgetState.OFF,
+            org.robolectric.Shadows.shadowOf(off).savedIntent.getStringExtra("power_action"))
+        assertEquals(8, org.robolectric.Shadows.shadowOf(other).savedIntent
+            .getIntExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID, -1))
+    }
+
     @Test fun remoteViewsInflateAndAcceptAllRuntimeActions() {
         val context = RuntimeEnvironment.getApplication()
         val views = RemoteViews(context.packageName, R.layout.widget_power)

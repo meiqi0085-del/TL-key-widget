@@ -75,8 +75,8 @@ android {
         applicationId = "com.ywpc.tlkey.widget"
         minSdk = 26
         targetSdk = 36
-        versionCode = appVersionCode
-        versionName = "1.1.0-widget"
+        versionCode = appVersionCode + 1
+        versionName = "1.1.1-widget"
 
         buildConfigField("String", "MQTT_LEGACY_USER", kotlinString(mqttLegacyUser))
         buildConfigField("String", "MQTT_LEGACY_PASSWORD", kotlinString(mqttLegacyPassword))

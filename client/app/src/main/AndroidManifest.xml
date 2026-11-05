@@ -109,8 +109,6 @@
         <activity android:name=".widget.PowerWidgetConfigureActivity" android:exported="true">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" /></intent-filter>
         </activity>
-        <activity android:name=".widget.PowerWidgetActionActivity" android:exported="false"
-            android:excludeFromRecents="true" android:theme="@style/Theme.TLKey.Transparent" />
         <service android:name=".widget.PowerWidgetControlService" android:exported="false"
             android:foregroundServiceType="connectedDevice" />
     </application>
