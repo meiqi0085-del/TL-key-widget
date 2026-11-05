@@ -67,6 +67,9 @@ class MoreActivity : AppCompatActivity() {
         binding.btnEcu.setOnClickListener {
             startActivity(Intent(this, EcuActivity::class.java))
         }
+        binding.btnWidget.setOnClickListener {
+            startActivity(Intent(this, com.ywpc.tlkey.widget.PowerWidgetConfigureActivity::class.java))
+        }
         binding.btnRefresh.setOnClickListener { refreshVehicles() }
         binding.btnDiagnostics.setOnClickListener {
             startActivity(Intent(this, DiagnosticsActivity::class.java))
@@ -129,6 +132,7 @@ class MoreActivity : AppCompatActivity() {
             .setPositiveButton(R.string.confirm) { _, _ ->
                 app.controller.onLogout()
                 app.loginManager.logout()
+                com.ywpc.tlkey.widget.PowerWidgetProvider.refreshAll(this)
                 openLogin()
             }
             .show()

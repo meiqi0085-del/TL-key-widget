@@ -88,6 +88,24 @@ class App : Application() {
             preferences = preferences,
             appScope = appScope,
         )
+        androidx.core.content.ContextCompat.registerReceiver(
+            this,
+            object : android.content.BroadcastReceiver() {
+                override fun onReceive(context: android.content.Context, intent: android.content.Intent) {
+                    com.ywpc.tlkey.widget.PowerWidgetProvider.refreshAll(context)
+                }
+            },
+            android.content.IntentFilter().apply {
+                addAction(android.content.Intent.ACTION_SCREEN_ON)
+                addAction(android.content.Intent.ACTION_USER_PRESENT)
+            },
+            androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        com.ywpc.tlkey.widget.PowerWidgetProvider.refreshAll(this)
     }
 
     companion object {

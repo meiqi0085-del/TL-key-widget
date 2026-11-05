@@ -1,0 +1,34 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
+    android:background="@drawable/widget_card" android:padding="12dp">
+    <TextView android:id="@+id/widget_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="TL-key" android:textSize="16sp" android:textStyle="bold" android:textColor="@color/widget_icon_default" />
+    <TextView android:id="@+id/widget_vehicle" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="选择车辆 ›" android:textSize="11sp" android:maxLines="1" android:ellipsize="end"
+        android:paddingTop="3dp" android:paddingBottom="6dp" android:textColor="@color/widget_secondary" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:orientation="horizontal" android:baselineAligned="false">
+        <LinearLayout android:id="@+id/widget_on" android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:minHeight="48dp" android:orientation="vertical" android:gravity="center"
+            android:background="@drawable/widget_button" android:contentDescription="上电">
+            <ImageView android:id="@+id/widget_on_icon" android:layout_width="28dp" android:layout_height="28dp"
+                android:src="@drawable/ic_power" android:importantForAccessibility="no"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="上电"
+                android:textSize="13sp" android:layout_marginTop="3dp" android:textColor="@color/widget_icon_default"/>
+        </LinearLayout>
+        <TextView android:layout_width="8dp" android:layout_height="1dp" android:importantForAccessibility="no"/>
+        <LinearLayout android:id="@+id/widget_off" android:layout_width="0dp" android:layout_height="match_parent"
+            android:layout_weight="1" android:minHeight="48dp" android:orientation="vertical" android:gravity="center"
+            android:background="@drawable/widget_button" android:contentDescription="下电">
+            <ImageView android:id="@+id/widget_off_icon" android:layout_width="28dp" android:layout_height="28dp"
+                android:src="@drawable/widget_power_off" android:importantForAccessibility="no"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="下电"
+                android:textSize="13sp" android:layout_marginTop="3dp" android:textColor="@color/widget_icon_default"/>
+        </LinearLayout>
+    </LinearLayout>
+    <TextView android:id="@+id/widget_status" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="点击按钮控车" android:textSize="10sp" android:maxLines="2" android:ellipsize="end"
+        android:paddingTop="7dp" android:textColor="@color/widget_icon_default"/>
+    <TextView android:id="@+id/widget_time" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="操作反馈 · 非实时车况" android:textSize="9sp" android:maxLines="1" android:textColor="@color/widget_secondary"/>
+</LinearLayout>

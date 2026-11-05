@@ -21,6 +21,9 @@
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:name=".App"
         android:allowBackup="false"
@@ -92,6 +95,24 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+        <receiver android:name=".widget.PowerWidgetProvider" android:exported="false" android:label="@string/power_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/power_widget_info" />
+        </receiver>
+        <receiver android:name=".widget.PowerWidgetPinnedReceiver" android:exported="false" />
+        <activity android:name=".widget.PowerWidgetConfigureActivity" android:exported="true">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" /></intent-filter>
+        </activity>
+        <activity android:name=".widget.PowerWidgetActionActivity" android:exported="false"
+            android:excludeFromRecents="true" android:theme="@style/Theme.TLKey.Transparent" />
+        <service android:name=".widget.PowerWidgetControlService" android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
     </application>
 
 </manifest>

@@ -11,6 +11,7 @@ sealed interface ControlResult {
         override val trace: ControlTrace,
     ) : ControlResult
 
+    data class Busy(override val trace: ControlTrace) : ControlResult
     data class BluetoothDisabled(override val trace: ControlTrace) : ControlResult
     data class PermissionDenied(override val trace: ControlTrace) : ControlResult
     data class DeviceNotFound(override val trace: ControlTrace) : ControlResult
@@ -45,6 +46,7 @@ val ControlResult.isSuccess: Boolean
 
 fun ControlResult.userMessage(): String = when (this) {
     is ControlResult.Success -> "${action.displayName()}成功"
+    is ControlResult.Busy -> "车辆正在执行其他操作，请稍后重试"
     is ControlResult.BluetoothDisabled -> "蓝牙未开启"
     is ControlResult.PermissionDenied -> "缺少蓝牙权限"
     is ControlResult.DeviceNotFound -> "未找到车辆"

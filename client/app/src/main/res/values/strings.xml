@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TL Key</string>
+    <string name="app_name">TL-key 桌面版</string>
     <!-- 桌面快捷方式的 targetPackage 必须等于实际安装包名；debug 变体在 src/debug/res 覆盖。 -->
-    <string name="shortcut_target_package" translatable="false">com.ywpc.tlkey</string>
+    <string name="shortcut_target_package" translatable="false">com.ywpc.tlkey.widget</string>
 
     <string name="login_title">TL Key</string>
     <string name="login_subtitle">你的台铃，秒开秒锁</string>

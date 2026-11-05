@@ -69,13 +69,14 @@ val appVersionName = gitOutput(
 android {
     namespace = "com.ywpc.tlkey"
     compileSdk = 36
+    buildToolsVersion = "36.1.0"
 
     defaultConfig {
-        applicationId = "com.ywpc.tlkey"
+        applicationId = "com.ywpc.tlkey.widget"
         minSdk = 26
         targetSdk = 36
         versionCode = appVersionCode
-        versionName = appVersionName
+        versionName = "1.1.0-widget"
 
         buildConfigField("String", "MQTT_LEGACY_USER", kotlinString(mqttLegacyUser))
         buildConfigField("String", "MQTT_LEGACY_PASSWORD", kotlinString(mqttLegacyPassword))
@@ -127,6 +128,8 @@ android {
         }
     }
 
+    testOptions { unitTests.isIncludeAndroidResources = true }
+
     buildFeatures {
         buildConfig = true
         viewBinding = true
@@ -150,4 +153,5 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.7")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.17")
 }

@@ -80,14 +80,24 @@ class VehicleController(
 
     suspend fun lock(): ControlResult = control(ControlAction.LOCK)
 
-    suspend fun control(action: ControlAction): ControlResult = mutex.withLock {
+    suspend fun control(action: ControlAction, vehicleId: String? = null): ControlResult {
+        // Reject competing taps instead of queuing a stale power command.
+        if (!mutex.tryLock()) return ControlResult.Busy(ControlTrace(action))
+        try {
+            return controlLocked(action, vehicleId)
+        } finally {
+            mutex.unlock()
+        }
+    }
+
+    private suspend fun controlLocked(action: ControlAction, vehicleId: String?): ControlResult {
         idleJob?.cancel()
         idleJob = null
         _linkState.value = LinkState.CONNECTING
         val trace = ControlTrace(action)
 
         val result = try {
-            val vehicle = ensureVehicle()
+            val vehicle = ensureVehicle(vehicleId)
             val uid = resolveUid(vehicle)
             val protocol = ProtocolSelector.create(vehicle.modelType)
                 ?: throw UnsupportedVehicleException(vehicle.modelType)
@@ -119,7 +129,7 @@ class VehicleController(
 
         if (result is ControlResult.Success) scheduleIdleClose()
         persist(result)
-        result
+        return result
     }
 
     /** 不阻塞调用方；真正关闭时会和正在执行的控制串行。 */
@@ -217,7 +227,14 @@ class VehicleController(
 
     fun onLogout() = closeSession()
 
-    private suspend fun ensureVehicle(): Vehicle {
+    private suspend fun ensureVehicle(vehicleId: String? = null): Vehicle {
+        if (!authRepository.hasToken()) throw BleException.AuthFailed("请先登录 TL-key")
+        if (vehicleId != null) {
+            // Widget targets are immutable snapshots, never the UI's active vehicle.
+            val target = vehicleRepository.find(vehicleId) ?: throw NoVehicleException()
+            if (!target.hasBleCredentials) throw BleException.AuthFailed("请在 TL-key 中完成车辆配对")
+            return target
+        }
         val cached = vehicleRepository.cached()
             ?: throw NoVehicleException()
 

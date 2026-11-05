@@ -1,0 +1,7 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="140dp" android:minHeight="160dp" android:minResizeWidth="140dp" android:minResizeHeight="160dp"
+    android:targetCellWidth="2" android:targetCellHeight="2" android:updatePeriodMillis="0"
+    android:initialLayout="@layout/widget_power" android:previewLayout="@layout/widget_power"
+    android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen"
+    android:configure="com.ywpc.tlkey.widget.PowerWidgetConfigureActivity" android:widgetFeatures="reconfigurable"
+    android:description="@string/power_widget_description" />

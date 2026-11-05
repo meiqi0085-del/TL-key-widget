@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (!busy) renderVehicles()
+        com.ywpc.tlkey.widget.PowerWidgetProvider.refreshAll(this)
         loadLastResult()
     }
 
@@ -237,6 +238,7 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(R.string.vehicle_remove_confirm) { _, _ ->
                 activationJob?.cancel()
                 app.loginManager.removeLocal(vehicle.id)
+                com.ywpc.tlkey.widget.PowerWidgetProvider.refreshAll(this)
                 app.controller.closeSession()
                 renderVehicles(preferredId = app.controller.activeVehicleId())
                 showEvent(getString(R.string.vehicle_removed), isError = false)
